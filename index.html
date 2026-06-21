@@ -90,6 +90,21 @@ header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; h
 .card-date { font-size: 0.67rem; color: rgba(255,255,255,0.3); }
 .btn-recruiter { font-size: 0.68rem; padding: 4px 10px; background: rgba(231,76,60,0.12); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); border-radius: 5px; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: inherit; }
 .btn-recruiter:hover { background: rgba(231,76,60,0.22); border-color: rgba(231,76,60,0.5); }
+.btn-email { font-size: 0.68rem; padding: 4px 10px; background: rgba(61,81,112,0.12); color: #3d5170; border: 1px solid rgba(61,81,112,0.25); border-radius: 5px; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: inherit; }
+.btn-email:hover { background: rgba(61,81,112,0.22); border-color: rgba(61,81,112,0.5); }
+#email-modal { display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; }
+#email-modal.open { display:flex; }
+#email-box { background:#fff; border-radius:14px; padding:28px 32px; width:620px; max-width:95vw; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); display:flex; flex-direction:column; gap:14px; }
+#email-box h3 { font-size:1rem; font-weight:700; color:#3d5170; margin:0; }
+.email-tabs { display:flex; gap:6px; }
+.email-tab { padding:5px 14px; border-radius:6px; border:1px solid rgba(0,0,0,0.12); background:#f5f5f5; font-size:0.78rem; font-weight:600; cursor:pointer; color:rgba(0,0,0,0.5); font-family:inherit; transition:all 0.15s; }
+.email-tab.active { background:#3d5170; color:#fff; border-color:#3d5170; }
+#email-subject { width:100%; border:1px solid rgba(0,0,0,0.15); border-radius:7px; padding:8px 12px; font-size:0.85rem; font-family:inherit; color:#1a1a2e; box-sizing:border-box; }
+#email-body { width:100%; border:1px solid rgba(0,0,0,0.15); border-radius:7px; padding:12px; font-size:0.84rem; font-family:inherit; color:#1a1a2e; min-height:280px; resize:vertical; line-height:1.6; box-sizing:border-box; }
+.email-actions { display:flex; gap:8px; justify-content:flex-end; }
+.btn-copy-email { padding:8px 18px; background:linear-gradient(135deg,#2ec4b6,#25b0a0); color:#fff; border:none; border-radius:7px; font-size:0.82rem; font-weight:700; cursor:pointer; font-family:inherit; }
+.btn-close-email { padding:8px 14px; background:#f0f0f0; color:rgba(0,0,0,0.5); border:none; border-radius:7px; font-size:0.82rem; cursor:pointer; font-family:inherit; }
+.sender-select { font-size:0.78rem; padding:5px 9px; border:1px solid rgba(0,0,0,0.12); border-radius:6px; font-family:inherit; color:#3d5170; font-weight:600; }
 .suspected-recruiter { border-left-color: #f39c12 !important; }
 .rec-warning { font-size: 0.67rem; font-weight: 700; color: #f39c12; background: rgba(243,156,18,0.12); border: 1px solid rgba(243,156,18,0.3); border-radius: 5px; padding: 3px 9px; margin-bottom: 2px; letter-spacing: 0.3px; }
 
@@ -110,6 +125,30 @@ header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; h
 
 <canvas id="network-canvas"></canvas>
 <div class="save-toast" id="save-toast"></div>
+
+<div id="email-modal">
+  <div id="email-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h3 id="email-modal-title">Draft Email</h3>
+      <select class="sender-select" id="email-sender">
+        <option value="omari">Omari Harry — Founder</option>
+        <option value="amanda">Amanda Ogede — Commercial Director</option>
+      </select>
+    </div>
+    <div class="email-tabs">
+      <button class="email-tab active" data-tpl="cold">Cold Outreach</button>
+      <button class="email-tab" data-tpl="followup">Follow-up</button>
+      <button class="email-tab" data-tpl="postmeeting">Post-Meeting</button>
+    </div>
+    <input id="email-subject" type="text" placeholder="Subject">
+    <textarea id="email-body"></textarea>
+    <div class="email-actions">
+      <button class="btn-close-email" id="btn-close-email">Close</button>
+      <button class="btn-copy-email" id="btn-copy-subject">Copy Subject</button>
+      <button class="btn-copy-email" id="btn-copy-body">Copy Email</button>
+    </div>
+  </div>
+</div>
 
 <header>
   <div class="logo-area">
@@ -410,7 +449,7 @@ function render(){
     const suspected=isSuspectedRecruiter(lead);
     card.className='card priority-'+lead.priority+(suspected?' suspected-recruiter':'');
     const sal=lead.salary&&lead.salary!=='Not listed'?lead.salary:'Not listed';
-    const viewBtn=lead.url?'<a class="btn-view" href="'+e(lead.url)+'" target="_blank" rel="noopener">View Job</a>':'';
+    const viewBtn=lead.url?'<a class="btn-view" href="'+eu(lead.url)+'" target="_blank" rel="noopener">View Job</a>':'';
     const leadKey=lead.url||lead.company+'|'+lead.title;
     const opts=SO.map(function(s){return '<option value="'+s+'"'+(s===lead.status?' selected':'')+'>'+s+'</option>';}).join('');
     card.innerHTML=
@@ -438,12 +477,19 @@ function render(){
         '<select class="status-select" data-idx="'+(st+idx)+'">'+opts+'</select>'+
         viewBtn+
         '<span class="card-date">Found '+e(lead.date_found)+'</span>'+
+        '<button class="btn-email" data-idx="'+(st+idx)+'">Draft Email</button>'+
         '<button class="btn-recruiter" data-key="'+e(leadKey)+'" data-idx="'+(st+idx)+'">Recruiter</button>'+
       '</div>';
     c.appendChild(card);
   });
   c.querySelectorAll('.status-select').forEach(sel=>{
     sel.addEventListener('change',function(ev){const i=parseInt(ev.target.dataset.idx);filtered[i].status=ev.target.value;const g=allLeads.indexOf(filtered[i]);if(g>=0)allLeads[g].status=ev.target.value;updateStats();if(autoSaveOn)saveToStorage();});
+  });
+  c.querySelectorAll('.btn-email').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      const i=parseInt(btn.dataset.idx);
+      openEmailModal(filtered[i]);
+    });
   });
   c.querySelectorAll('.btn-recruiter').forEach(function(btn){
     btn.addEventListener('click',function(){
@@ -464,6 +510,7 @@ function render(){
   renderPag();
 }
 function e(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function eu(s){return String(s||'').replace(/"/g,'&quot;');}
 
 function renderPag(){
   const tot=Math.ceil(filtered.length/PAGE_SIZE),pag=document.getElementById('pagination');
@@ -492,6 +539,107 @@ document.getElementById('btn-export').addEventListener('click',()=>{
   const lines=[flds.join(','),...allLeads.map(r=>flds.map(f=>cv(r[f])).join(','))];
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\r\n')],{type:'text/csv;charset=utf-8;'}));a.download='leads.csv';a.click();URL.revokeObjectURL(a.href);
 });
+// ── EMAIL TEMPLATES ───────────────────────────────────────────────────────────
+const SENDERS={
+  omari:{name:'Omari Harry',title:'Founder',email:'omari@arthurcurtiseducation.co.uk'},
+  amanda:{name:'Amanda Ogede',title:'Commercial Director',email:'amanda@arthurcurtiseducation.co.uk'}
+};
+let emailLead=null,emailTpl='cold';
+
+function buildEmail(lead,tpl,sender){
+  const s=SENDERS[sender];
+  const co=lead.company||'the organisation';
+  const role=lead.title||'the role';
+  const contact=lead.contact_name?lead.contact_name.split(' ')[0]:'there';
+  const subjects={
+    cold: 'Workforce Development & Apprenticeship Levy — '+co,
+    followup: 'Following up — Workforce Development at '+co,
+    postmeeting: 'Great speaking with you — next steps'
+  };
+  const bodies={
+    cold:
+`Hi ${contact},
+
+I noticed ${co} is recruiting for ${role} — it caught my attention because it signals you're thinking seriously about your talent and leadership pipeline.
+
+I'm ${s.name}, ${s.title} at Arthur Curtis Education. We work with employers to build sustainable talent pipelines through workforce development, apprenticeships, and funded learning — not as standalone programmes, but as part of a longer-term strategy aligned to your business goals.
+
+Whether you're looking to develop existing talent, bring in the next generation of leaders, or make better use of your Apprenticeship Levy, we'd love to have a conversation.
+
+Would you be open to a 20-minute call to explore whether there's a fit?
+
+${s.name}
+${s.title}, Arthur Curtis Education
+${s.email}`,
+
+    followup:
+`Hi ${contact},
+
+I wanted to follow up on my previous email regarding workforce development at ${co}.
+
+I appreciate you're busy — I'll keep this brief. We've helped organisations similar to yours turn their Apprenticeship Levy into a genuine strategic advantage, funding leadership development and succession planning that actually sticks.
+
+If now isn't the right time, I completely understand. But if you'd like a quick conversation about what's possible, I'm happy to work around your schedule.
+
+${s.name}
+${s.title}, Arthur Curtis Education
+${s.email}`,
+
+    postmeeting:
+`Hi ${contact},
+
+Really enjoyed our conversation — it's clear ${co} is thinking about talent development in the right way.
+
+As discussed, I'll put together some thoughts on how we could support your goals around ${role.toLowerCase().includes('people')||role.toLowerCase().includes('hr')?'people strategy and succession planning':'workforce development and funded learning'} and send them across by end of week.
+
+In the meantime, feel free to reach out if anything comes to mind.
+
+${s.name}
+${s.title}, Arthur Curtis Education
+${s.email}`
+  };
+  return {subject: subjects[tpl], body: bodies[tpl]};
+}
+
+function openEmailModal(lead){
+  emailLead=lead;
+  emailTpl='cold';
+  document.querySelectorAll('.email-tab').forEach(t=>t.classList.toggle('active',t.dataset.tpl==='cold'));
+  const sender=document.getElementById('email-sender').value;
+  const {subject,body}=buildEmail(lead,emailTpl,sender);
+  document.getElementById('email-subject').value=subject;
+  document.getElementById('email-body').value=body;
+  document.getElementById('email-modal-title').textContent='Draft Email — '+lead.company;
+  document.getElementById('email-modal').classList.add('open');
+}
+
+document.querySelectorAll('.email-tab').forEach(tab=>{
+  tab.addEventListener('click',function(){
+    emailTpl=this.dataset.tpl;
+    document.querySelectorAll('.email-tab').forEach(t=>t.classList.toggle('active',t===this));
+    const sender=document.getElementById('email-sender').value;
+    const {subject,body}=buildEmail(emailLead,emailTpl,sender);
+    document.getElementById('email-subject').value=subject;
+    document.getElementById('email-body').value=body;
+  });
+});
+document.getElementById('email-sender').addEventListener('change',function(){
+  if(!emailLead)return;
+  const {subject,body}=buildEmail(emailLead,emailTpl,this.value);
+  document.getElementById('email-subject').value=subject;
+  document.getElementById('email-body').value=body;
+});
+document.getElementById('btn-close-email').addEventListener('click',()=>document.getElementById('email-modal').classList.remove('open'));
+document.getElementById('email-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+document.getElementById('btn-copy-body').addEventListener('click',function(){
+  navigator.clipboard.writeText(document.getElementById('email-body').value);
+  this.textContent='Copied!';setTimeout(()=>this.textContent='Copy Email',1500);
+});
+document.getElementById('btn-copy-subject').addEventListener('click',function(){
+  navigator.clipboard.writeText(document.getElementById('email-subject').value);
+  this.textContent='Copied!';setTimeout(()=>this.textContent='Copy Subject',1500);
+});
+
 document.getElementById('btn-export-deletions').addEventListener('click',function(){
   const deleted=[...getDeleted()];
   if(!deleted.length){alert('No recruiter adverts marked for deletion yet.');return;}
