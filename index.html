@@ -260,15 +260,20 @@ function markDeleted(key){
   localStorage.setItem(LS_DELETED,JSON.stringify([...d]));
 }
 function deleteLead(key,globalIdx){
-  markDeleted(key);
-  allLeads.splice(globalIdx,1);
-  filtered=filtered.filter(function(l){
-    return (l.url||l.company+'|'+l.title)!==key;
+  const company=(allLeads[globalIdx]||{}).company||'';
+  const toDelete=allLeads.filter(function(l){
+    return company&&l.company===company;
   });
+  const count=toDelete.length;
+  toDelete.forEach(function(l){
+    markDeleted(l.url||l.company+'|'+l.title);
+  });
+  allLeads=allLeads.filter(function(l){return !company||l.company!==company;});
+  filtered=filtered.filter(function(l){return !company||l.company!==company;});
   updateStats();
   document.getElementById('result-count').textContent=filtered.length.toLocaleString()+' result'+(filtered.length!==1?'s':'');
   render();
-  showToast('Recruiter advert removed');
+  showToast(count>1?'Removed '+count+' adverts from '+company:'Recruiter advert removed');
 }
 
 function loadFromStorage(){
