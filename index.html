@@ -8,6 +8,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: "Segoe UI", Arial, sans-serif; background: #ffffff; color: #1a1a2e; min-height: 100vh; overflow-x: hidden; }
 #network-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+#tab-bar { position: sticky; top: 74px; z-index: 99; background: #fff; display: flex; gap: 0; border-bottom: 2px solid #eef0f5; padding: 0 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.tab-btn { background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -2px; padding: 10px 22px; font-size: 0.82rem; font-weight: 600; color: rgba(0,0,0,0.4); cursor: pointer; transition: all 0.2s; font-family: inherit; white-space: nowrap; }
+.tab-btn:hover { color: #3d5170; }
+.tab-btn.active { color: #2ec4b6; border-bottom-color: #2ec4b6; }
 
 /* HEADER */
 header { position: sticky; top: 0; z-index: 100; background: #ffffff; backdrop-filter: none; border-bottom: none; padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
@@ -32,7 +36,7 @@ header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; h
 .save-toast.show { opacity:1; }
 
 /* FILTERS */
-#filters { display: none; position: sticky; top: 74px; z-index: 90; background: #ffffff; backdrop-filter: none; border-bottom: 1px solid rgba(0,0,0,0.08); padding: 11px 28px; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+#filters { display: none; position: sticky; top: 118px; z-index: 90; background: #ffffff; backdrop-filter: none; border-bottom: 1px solid rgba(0,0,0,0.08); padding: 11px 28px; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
 .fg { display: flex; flex-direction: column; gap: 3px; }
 .fg label { font-size: 0.65rem; font-weight: 700; color: #2ec4b6; text-transform: uppercase; letter-spacing: 0.6px; }
 .fg select, .fg input { border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; padding: 6px 9px; font-size: 0.8rem; background: #fff; color: #1a1a2e; outline: none; transition: border-color 0.2s; font-family: inherit; }
@@ -180,6 +184,13 @@ header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; h
   </div>
 </header>
 
+<div id="tab-bar">
+  <button class="tab-btn active" data-tab="today">Today</button>
+  <button class="tab-btn" data-tab="high">High Priority</button>
+  <button class="tab-btn" data-tab="pipeline">Pipeline</button>
+  <button class="tab-btn" data-tab="all">All</button>
+</div>
+
 <div id="filters">
   <div class="fg"><label>Search</label><input type="text" id="search-input" placeholder="Company, title, location…"></div>
   <div class="fg"><label>Priority</label><select id="filter-priority"><option value="">All</option><option>High</option><option>Medium</option><option>Low</option></select></div>
@@ -316,7 +327,7 @@ function setAutoSave(on){
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
 const EMBEDDED=JSON.parse(document.getElementById('lead-data').textContent||'[]');
-let allLeads=[],filtered=[],suspectedFilterOn=false;
+let allLeads=[],filtered=[],suspectedFilterOn=false,activeTab='today';
 const PAGE_SIZE=30;
 let currentPage=1;
 const SO=['New','Researching','Outreach sent','Meeting booked','Proposal sent','Won','Not a fit'];
@@ -401,7 +412,12 @@ function applyFilters(){
     st=document.getElementById('filter-status').value,
     sv=document.getElementById('filter-salary').value,
     sm=parseInt(sv)||0,lo=sv==='listed';
+  const today=new Date().toISOString().slice(0,10);
+  const PIPELINE_STATUSES=['Researching','Outreach sent','Meeting booked','Proposal sent','Won','Not a fit'];
   filtered=allLeads.filter(r=>{
+    if(activeTab==='today'&&r.date_found!==today)return false;
+    if(activeTab==='high'&&r.priority!=='High')return false;
+    if(activeTab==='pipeline'&&!PIPELINE_STATUSES.includes(r.status))return false;
     if(q&&!`${r.company} ${r.title} ${r.location}`.toLowerCase().includes(q))return false;
     if(pr&&r.priority!==pr)return false;
     if(ca&&r.category!==ca)return false;
@@ -432,6 +448,14 @@ function resetF(){
   syncBtns();applyFilters();
 }
 document.getElementById('stat-total-btn').addEventListener('click',resetF);
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    activeTab=btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b===btn));
+    syncBtns();applyFilters();
+  });
+});
+
 document.getElementById('stat-high-btn').addEventListener('click',()=>{const s=document.getElementById('filter-priority');s.value=s.value==='High'?'':'High';if(s.value)document.getElementById('filter-status').value='';syncBtns();applyFilters();});
 document.getElementById('stat-medium-btn').addEventListener('click',()=>{const s=document.getElementById('filter-priority');s.value=s.value==='Medium'?'':'Medium';if(s.value)document.getElementById('filter-status').value='';syncBtns();applyFilters();});
 document.getElementById('stat-new-btn').addEventListener('click',()=>{const s=document.getElementById('filter-status');s.value=s.value==='New'?'':'New';if(s.value)document.getElementById('filter-priority').value='';suspectedFilterOn=false;syncBtns();applyFilters();});
