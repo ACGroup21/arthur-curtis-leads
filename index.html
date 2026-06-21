@@ -268,7 +268,7 @@ function setAutoSave(on){
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
 const EMBEDDED=JSON.parse(document.getElementById('lead-data').textContent||'[]');
-let allLeads=[],filtered=[];
+let allLeads=[],filtered=[],suspectedFilterOn=false;
 const PAGE_SIZE=30;
 let currentPage=1;
 const SO=['New','Researching','Outreach sent','Meeting booked','Proposal sent','Won','Not a fit'];
@@ -382,7 +382,6 @@ function resetF(){
 document.getElementById('stat-total-btn').addEventListener('click',resetF);
 document.getElementById('stat-high-btn').addEventListener('click',()=>{const s=document.getElementById('filter-priority');s.value=s.value==='High'?'':'High';if(s.value)document.getElementById('filter-status').value='';syncBtns();applyFilters();});
 document.getElementById('stat-medium-btn').addEventListener('click',()=>{const s=document.getElementById('filter-priority');s.value=s.value==='Medium'?'':'Medium';if(s.value)document.getElementById('filter-status').value='';syncBtns();applyFilters();});
-let suspectedFilterOn=false;
 document.getElementById('stat-new-btn').addEventListener('click',()=>{const s=document.getElementById('filter-status');s.value=s.value==='New'?'':'New';if(s.value)document.getElementById('filter-priority').value='';suspectedFilterOn=false;syncBtns();applyFilters();});
 document.getElementById('stat-suspected-btn').addEventListener('click',()=>{
   suspectedFilterOn=!suspectedFilterOn;
