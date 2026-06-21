@@ -476,10 +476,10 @@ function render(){
       '<div class="card-footer">'+
         '<select class="status-select" data-idx="'+(st+idx)+'">'+opts+'</select>'+
         viewBtn+
-        '<span class="card-date">Found '+e(lead.date_found)+'</span>'+
         '<button class="btn-email" data-idx="'+(st+idx)+'">Draft Email</button>'+
         '<button class="btn-recruiter" data-key="'+e(leadKey)+'" data-idx="'+(st+idx)+'">Recruiter</button>'+
-      '</div>';
+      '</div>'+
+      '<div style="padding:4px 0 2px;"><span class="card-date">Found '+e(lead.date_found)+'</span></div>';
     c.appendChild(card);
   });
   c.querySelectorAll('.status-select').forEach(sel=>{
