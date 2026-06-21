@@ -80,6 +80,10 @@ header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; h
 .contact-input::placeholder { color: rgba(255,255,255,0.2); }
 .contact-input:focus { border-color: #2ec4b6; background: rgba(0,0,0,0.25); color: #fff; }
 .contact-input.filled { background: rgba(46,196,182,0.1); border-color: rgba(46,196,182,0.4); color: #fff; }
+.input-link-wrap { display: flex; align-items: center; flex: 1; gap: 4px; }
+.input-link-wrap .contact-input { flex: 1; }
+.input-link-btn { color: #2ec4b6; text-decoration: none; font-size: 1rem; line-height: 1; padding: 2px 4px; border-radius: 4px; transition: background 0.2s; flex-shrink: 0; }
+.input-link-btn:hover { background: rgba(46,196,182,0.2); }
 
 /* FOOTER */
 .card-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -477,8 +481,12 @@ function render(){
       '<div class="card-contacts">'+
         '<div class="cr"><label>Name</label><input class="contact-input'+(lead.contact_name?' filled':'')+'" type="text" placeholder="Contact name" value="'+e(lead.contact_name||'')+'" data-field="contact_name" data-idx="'+(st+idx)+'"></div>'+
         '<div class="cr"><label>Title</label><input class="contact-input'+(lead.contact_title?' filled':'')+'" type="text" placeholder="Job title" value="'+e(lead.contact_title||'')+'" data-field="contact_title" data-idx="'+(st+idx)+'"></div>'+
-        '<div class="cr"><label>LinkedIn</label><input class="contact-input'+(lead.contact_linkedin?' filled':'')+'" type="text" placeholder="linkedin.com/in/" value="'+e(lead.contact_linkedin||'')+'" data-field="contact_linkedin" data-idx="'+(st+idx)+'"></div>'+
-        '<div class="cr"><label>Email</label><input class="contact-input'+(lead.contact_email?' filled':'')+'" type="text" placeholder="email@company.com" value="'+e(lead.contact_email||'')+'" data-field="contact_email" data-idx="'+(st+idx)+'"></div>'+
+        '<div class="cr"><label>LinkedIn</label><div class="input-link-wrap">'+
+          '<input class="contact-input'+(lead.contact_linkedin?' filled':'')+'" type="text" placeholder="linkedin.com/in/" value="'+e(lead.contact_linkedin||'')+'" data-field="contact_linkedin" data-idx="'+(st+idx)+'">'+
+          (lead.contact_linkedin?'<a class="input-link-btn" href="'+eu(lead.contact_linkedin.startsWith('http')?lead.contact_linkedin:'https://'+lead.contact_linkedin)+'" target="_blank" title="Open LinkedIn">&#8599;</a>':'')+'</div></div>'+
+        '<div class="cr"><label>Email</label><div class="input-link-wrap">'+
+          '<input class="contact-input'+(lead.contact_email?' filled':'')+'" type="text" placeholder="email@company.com" value="'+e(lead.contact_email||'')+'" data-field="contact_email" data-idx="'+(st+idx)+'">'+
+          (lead.contact_email?'<a class="input-link-btn" href="mailto:'+eu(lead.contact_email)+'" title="Send email">&#9993;</a>':'')+'</div></div>'+
         '<div class="cr"><label>Mobile</label><input class="contact-input'+(lead.contact_mobile?' filled':'')+'" type="text" placeholder="+44 7" value="'+e(lead.contact_mobile||'')+'" data-field="contact_mobile" data-idx="'+(st+idx)+'"></div>'+
         '<div class="cr"><label>Phone</label><input class="contact-input'+(lead.contact_phone?' filled':'')+'" type="text" placeholder="+44 1" value="'+e(lead.contact_phone||'')+'" data-field="contact_phone" data-idx="'+(st+idx)+'"></div>'+
       '</div>'+
