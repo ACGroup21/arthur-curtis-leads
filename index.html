@@ -504,7 +504,10 @@ function render(){
     btn.addEventListener('click',function(){
       const key=btn.dataset.key;
       const idx=parseInt(btn.dataset.idx);
-      if(confirm('Mark as recruiter advert and remove it?')){deleteLead(key,idx);}
+      const company=(filtered[idx]||{}).company||'';
+      const count=allLeads.filter(function(l){return company&&l.company===company;}).length;
+      const msg=count>1?'Remove all '+count+' adverts from '+company+'? This cannot be undone.':'Mark as recruiter advert and remove it? This cannot be undone.';
+      if(confirm(msg)){deleteLead(key,idx);}
     });
   });
   c.querySelectorAll('.contact-input').forEach(inp=>{
