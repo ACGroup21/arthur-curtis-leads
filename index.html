@@ -403,6 +403,10 @@ function applyFilters(){
     if(suspectedFilterOn&&!isSuspectedRecruiter(r))return false;
     return true;
   });
+  filtered.sort((a,b)=>{
+    const ae=!!(a.contact_email||'').trim(), be=!!(b.contact_email||'').trim();
+    if(ae&&!be)return -1; if(!ae&&be)return 1; return 0;
+  });
   currentPage=1;
   document.getElementById('result-count').textContent=`${filtered.length.toLocaleString()} result${filtered.length!==1?'s':''}`;
   render();
