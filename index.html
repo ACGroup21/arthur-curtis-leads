@@ -552,51 +552,15 @@ function buildEmail(lead,tpl,sender){
   const role=lead.title||'the role';
   const contact=lead.contact_name?lead.contact_name.split(' ')[0]:'there';
   const subjects={
-    cold: 'Workforce Development & Apprenticeship Levy — '+co,
-    followup: 'Following up — Workforce Development at '+co,
-    postmeeting: 'Great speaking with you — next steps'
+    cold: 'Workforce Development & Apprenticeship Levy - '+co,
+    followup: 'Following up - Workforce Development at '+co,
+    postmeeting: 'Great speaking with you - next steps'
   };
+  const n='\n';
   const bodies={
-    cold:
-`Hi ${contact},
-
-I noticed ${co} is recruiting for ${role} — it caught my attention because it signals you're thinking seriously about your talent and leadership pipeline.
-
-I'm ${s.name}, ${s.title} at Arthur Curtis Education. We work with employers to build sustainable talent pipelines through workforce development, apprenticeships, and funded learning — not as standalone programmes, but as part of a longer-term strategy aligned to your business goals.
-
-Whether you're looking to develop existing talent, bring in the next generation of leaders, or make better use of your Apprenticeship Levy, we'd love to have a conversation.
-
-Would you be open to a 20-minute call to explore whether there's a fit?
-
-${s.name}
-${s.title}, Arthur Curtis Education
-${s.email}`,
-
-    followup:
-`Hi ${contact},
-
-I wanted to follow up on my previous email regarding workforce development at ${co}.
-
-I appreciate you're busy — I'll keep this brief. We've helped organisations similar to yours turn their Apprenticeship Levy into a genuine strategic advantage, funding leadership development and succession planning that actually sticks.
-
-If now isn't the right time, I completely understand. But if you'd like a quick conversation about what's possible, I'm happy to work around your schedule.
-
-${s.name}
-${s.title}, Arthur Curtis Education
-${s.email}`,
-
-    postmeeting:
-`Hi ${contact},
-
-Really enjoyed our conversation — it's clear ${co} is thinking about talent development in the right way.
-
-As discussed, I'll put together some thoughts on how we could support your goals around ${role.toLowerCase().includes('people')||role.toLowerCase().includes('hr')?'people strategy and succession planning':'workforce development and funded learning'} and send them across by end of week.
-
-In the meantime, feel free to reach out if anything comes to mind.
-
-${s.name}
-${s.title}, Arthur Curtis Education
-${s.email}`
+    cold: 'Hi '+contact+','+n+n+'I noticed '+co+' is recruiting for '+role+' - it caught my attention because it signals you are thinking seriously about your talent and leadership pipeline.'+n+n+'I\'m '+s.name+', '+s.title+' at Arthur Curtis Education. We work with employers to build sustainable talent pipelines through workforce development, apprenticeships, and funded learning - not as standalone programmes, but as part of a longer-term strategy aligned to your business goals.'+n+n+'Whether you\'re looking to develop existing talent, bring in the next generation of leaders, or make better use of your Apprenticeship Levy, we\'d love to have a conversation.'+n+n+'Would you be open to a 20-minute call to explore whether there\'s a fit?'+n+n+s.name+n+s.title+', Arthur Curtis Education'+n+s.email,
+    followup: 'Hi '+contact+','+n+n+'I wanted to follow up on my previous email regarding workforce development at '+co+'.'+n+n+'I appreciate you\'re busy - I\'ll keep this brief. We\'ve helped organisations similar to yours turn their Apprenticeship Levy into a genuine strategic advantage, funding leadership development and succession planning that actually sticks.'+n+n+'If now isn\'t the right time, I completely understand. But if you\'d like a quick conversation about what\'s possible, I\'m happy to work around your schedule.'+n+n+s.name+n+s.title+', Arthur Curtis Education'+n+s.email,
+    postmeeting: 'Hi '+contact+','+n+n+'Really enjoyed our conversation - it\'s clear '+co+' is thinking about talent development in the right way.'+n+n+'As discussed, I\'ll put together some thoughts on how we could support your goals and send them across by end of week.'+n+n+'In the meantime, feel free to reach out if anything comes to mind.'+n+n+s.name+n+s.title+', Arthur Curtis Education'+n+s.email
   };
   return {subject: subjects[tpl], body: bodies[tpl]};
 }
